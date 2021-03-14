@@ -80,6 +80,8 @@ func (p *Pool) purgePeriodically() {
 		// may be blocking and may consume a lot of time if many workers
 		// are located on non-local CPUs.
 		for i := range expiredWorkers {
+			//close(expiredWorkers[i].task)
+			// 把nil推进expiredWorkers[i].task 会在worker.go的run函数中销毁该worker
 			expiredWorkers[i].task <- nil
 			expiredWorkers[i] = nil
 		}

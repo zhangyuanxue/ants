@@ -23,7 +23,6 @@
 package ants
 
 import (
-	"fmt"
 	"runtime"
 	"time"
 )
@@ -63,7 +62,6 @@ func (w *goWorker) run() {
 		}()
 
 		for f := range w.task {
-			fmt.Println("test")
 			if f == nil {
 				return
 			}
