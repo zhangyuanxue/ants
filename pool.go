@@ -98,7 +98,7 @@ func NewPool(size int, options ...Option) (*Pool, error) {
 	opts := loadOptions(options...)
 
 	if size <= 0 {
-		return nil, ErrInvalidPreAllocSize
+		size = -1
 	}
 
 	if expiry := opts.ExpiryDuration; expiry < 0 {
@@ -129,6 +129,9 @@ func NewPool(size int, options ...Option) (*Pool, error) {
 	}
 
 	if p.options.PreAlloc {
+		if size == -1 {
+			return nil, ErrInvalidPreAllocSize
+		}
 		p.workers = newWorkerArray(loopQueueType, size)
 	} else {
 		p.workers = newWorkerArray(stackType, 0)
@@ -221,6 +224,7 @@ func (p *Pool) retrieveWorker() (w *goWorker) {
 	if w != nil {
 		p.lock.Unlock()
 	} else if capacity := p.Cap(); capacity == -1 {
+		// 不限制协程数量，没有就创建
 		p.lock.Unlock()
 		spawnWorker()
 	} else if p.Running() < capacity {
@@ -229,6 +233,7 @@ func (p *Pool) retrieveWorker() (w *goWorker) {
 	} else {
 		if p.options.Nonblocking {
 			p.lock.Unlock()
+			// TODO 此处直接return不会导致任务丢失吗？？？
 			return
 		}
 	Reentry:

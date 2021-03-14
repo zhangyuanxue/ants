@@ -83,6 +83,7 @@ func (wq *loopQueue) retrieveExpiry(duration time.Duration) []*goWorker {
 		return nil
 	}
 
+	// wq.expiry 设置为空切片
 	wq.expiry = wq.expiry[:0]
 	expiryTime := time.Now().Add(-duration)
 
@@ -91,7 +92,7 @@ func (wq *loopQueue) retrieveExpiry(duration time.Duration) []*goWorker {
 			break
 		}
 		wq.expiry = append(wq.expiry, wq.items[wq.head])
-		// 设置worker过期不用看该worker目前运行有哪些任务吗
+		// 在loop_queue里的worker当前是一定没有在运行任务的
 		wq.items[wq.head] = nil
 		wq.head++
 		if wq.head == wq.size {

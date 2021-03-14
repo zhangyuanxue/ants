@@ -45,6 +45,11 @@ func demoFunc() {
 }
 
 func main() {
+
+	a := []int{1, 2, 3}
+	a = a[:0]
+	fmt.Println(a)
+
 	defer ants.Release()
 
 	runTimes := 1000
@@ -94,3 +99,11 @@ func main() {
 		panic("the final result is wrong!!!")
 	}
 }
+
+/* pool执行逻辑
+
+1. 创建pool, 指定长度的未被实例化的workers切片
+2. submit任务的时候，若workers切片中有被实例化的对象时则直接利用该对象了执行任务，若无，则创建worker对象，运行任务完成后把worker放回workers切片（若满则丢回golang自带Pool池）
+
+
+*/
