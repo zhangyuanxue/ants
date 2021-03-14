@@ -40,7 +40,7 @@ func myFunc(i interface{}) {
 }
 
 func demoFunc() {
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(time.Second)
 	fmt.Println("Hello World!")
 }
 
@@ -55,13 +55,25 @@ func main() {
 		demoFunc()
 		wg.Done()
 	}
+
+	// test ---------------------
+	tt := ants.WithPreAlloc(true)
+	pool, _ := ants.NewPool(50, tt)
 	for i := 0; i < runTimes; i++ {
 		wg.Add(1)
-		_ = ants.Submit(syncCalculateSum)
+		_ = pool.Submit(syncCalculateSum)
 	}
 	wg.Wait()
 	fmt.Printf("running goroutines: %d\n", ants.Running())
 	fmt.Printf("finish all tasks.\n")
+
+	//for i := 0; i < runTimes; i++ {
+	//	wg.Add(1)
+	//	_ = ants.Submit(syncCalculateSum)
+	//}
+	//wg.Wait()
+	//fmt.Printf("running goroutines: %d\n", ants.Running())
+	//fmt.Printf("finish all tasks.\n")
 
 	// Use the pool with a method,
 	// set 10 to the capacity of goroutine pool and 1 second for expired duration.

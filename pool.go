@@ -32,9 +32,9 @@ import (
 
 // Pool accepts the tasks from client, it limits the total of goroutines to a given number by recycling goroutines.
 type Pool struct {
-	// capacity of the pool, a negative value means that the capacity of pool is limitless, an infinite pool is used to
-	// avoid potential issue of endless blocking caused by nested usage of a pool: submitting a task to pool
-	// which submits a new task to the same pool.
+	//capacity of the pool, a negative value means that the capacity of pool is limitless, an infinite pool is used to
+	//avoid potential issue of endless blocking caused by nested usage of a pool: submitting a task to pool
+	//which submits a new task to the same pool.
 	capacity int32
 
 	// running is the number of the currently running goroutines.
@@ -116,12 +116,18 @@ func NewPool(size int, options ...Option) (*Pool, error) {
 		lock:     internal.NewSpinLock(),
 		options:  opts,
 	}
+
+	//tt := workerChanCap
+	//fmt.Println(tt)
+
 	p.workerCache.New = func() interface{} {
 		return &goWorker{
 			pool: p,
+			// 根据机器创建是否带缓存的通道，多核的话带缓存
 			task: make(chan func(), workerChanCap),
 		}
 	}
+
 	if p.options.PreAlloc {
 		p.workers = newWorkerArray(loopQueueType, size)
 	} else {
@@ -131,7 +137,7 @@ func NewPool(size int, options ...Option) (*Pool, error) {
 	p.cond = sync.NewCond(p.lock)
 
 	// Start a goroutine to clean up expired workers periodically.
-	go p.purgePeriodically()
+	//go p.purgePeriodically()
 
 	return p, nil
 }
@@ -184,6 +190,7 @@ func (p *Pool) Release() {
 
 // Reboot reboots a released pool.
 func (p *Pool) Reboot() {
+	// TODO 此处应该先调用release
 	if atomic.CompareAndSwapInt32(&p.state, CLOSED, OPENED) {
 		go p.purgePeriodically()
 	}

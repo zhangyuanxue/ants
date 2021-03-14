@@ -33,7 +33,7 @@ func (wq *loopQueue) len() int {
 	if wq.tail > wq.head {
 		return wq.tail - wq.head
 	}
-
+	// 当从队列中移除元素的时候就会出现head大于0的情况
 	return wq.size - wq.head + wq.tail
 }
 
@@ -91,6 +91,7 @@ func (wq *loopQueue) retrieveExpiry(duration time.Duration) []*goWorker {
 			break
 		}
 		wq.expiry = append(wq.expiry, wq.items[wq.head])
+		// 设置worker过期不用看该worker目前运行有哪些任务吗
 		wq.items[wq.head] = nil
 		wq.head++
 		if wq.head == wq.size {
